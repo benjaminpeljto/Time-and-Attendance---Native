@@ -3,11 +3,10 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { BurchLogo, LoginButton } from "../components";
+import { AccessCodeInput, BurchLogo, LoginButton } from "../components";
 import useAccessLogin from "../hooks/useAccessLogin";
 
 export default function LoginScreen() {
@@ -28,17 +27,10 @@ export default function LoginScreen() {
               Proceed by entering your access code.
             </Text>
           </View>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              value={accessCode}
-              onChangeText={setAccessCode}
-              placeholder='Your Access Code'
-              placeholderTextColor={"rgba(255, 255, 255, 0.5)"}
-              style={styles.input}
-              keyboardType='number-pad'
-              maxLength={12}
-            />
-          </View>
+          <AccessCodeInput
+            accessCode={accessCode}
+            setAccessCode={setAccessCode}
+          />
           <LoginButton handleLogin={handleAccessLogin} />
         </View>
       </TouchableWithoutFeedback>
@@ -68,19 +60,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "white",
     opacity: 0.8,
-  },
-  inputWrapper: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-
-  input: {
-    width: 170,
-    fontSize: 20,
-    borderBottomWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
-    paddingBottom: 5,
-    color: "rgba(255, 255, 255, 0.6)",
-    textAlign: "center",
   },
 });
