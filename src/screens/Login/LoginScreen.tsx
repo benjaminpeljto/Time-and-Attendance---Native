@@ -1,23 +1,38 @@
 import {
   Keyboard,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { AccessCodeInput, BurchLogo, LoginButton } from "../components";
-import useAccessLogin from "../hooks/useAccessLogin";
+import {
+  AccessCodeInput,
+  BurchLogo,
+  LoginButton,
+  LoginScreenCredits,
+} from "../../components";
+import useAccessLogin from "../../hooks/useAccessLogin";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParams } from "../../navigation/RootStackNavigator";
 
-export default function LoginScreen() {
-  const { accessCode, setAccessCode, handleAccessLogin } = useAccessLogin();
+type LoginScreenProps = NativeStackScreenProps<RootStackParams, "Login">;
+
+export default function LoginScreen({ navigation }: LoginScreenProps) {
+  const { accessCode, handleAccessCodeChange, handleAccessLogin } =
+    useAccessLogin();
 
   const handleDismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
+  const handleLogin = () => {
+    if (handleAccessLogin()) {
+      navigation.navigate("BottomTabNav");
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
         <View style={styles.container}>
           <BurchLogo />
@@ -29,12 +44,16 @@ export default function LoginScreen() {
           </View>
           <AccessCodeInput
             accessCode={accessCode}
-            setAccessCode={setAccessCode}
+            handleAccessCodeChange={handleAccessCodeChange}
           />
-          <LoginButton handleLogin={handleAccessLogin} />
+          <LoginButton
+            handleLogin={handleLogin}
+            enabled={accessCode.length >= 14}
+          />
+          <LoginScreenCredits />
         </View>
       </TouchableWithoutFeedback>
-    </SafeAreaView>
+    </View>
   );
 }
 
