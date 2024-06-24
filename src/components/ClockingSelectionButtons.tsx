@@ -1,51 +1,35 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  ClockingType,
-  useClockingRequest,
-} from "../context/ClockingRequestContext";
+import { ClockingSelectionButtonsProps } from "../utils/types";
 
-export default function ClockingSelectionButtons() {
-  const { clockingType, setClockingType } = useClockingRequest();
-
-  const handleClockingButtonPress = (type: ClockingType) => {
-    setClockingType(type);
-  };
-
+export default function ClockingSelectionButtons({
+  handleClockingOptionChange,
+  optionSelected,
+}: ClockingSelectionButtonsProps) {
   return (
     <View style={styles.buttonContainer}>
       <Pressable
-        onPress={() => handleClockingButtonPress("ClockIn")}
+        onPress={() => handleClockingOptionChange("QR")}
         style={() => [
           styles.button,
-          clockingType === "ClockIn" ? styles.selectedButton : {},
+          optionSelected === "QR" ? styles.selectedButton : {},
         ]}
       >
-        <Ionicons
-          style={{ marginLeft: -10 }}
-          name='enter-outline'
-          size={50}
-          color='green'
-        />
-        <Text style={styles.buttonText}>Clock in</Text>
+        <Ionicons name='qr-code-outline' size={50} color='green' />
+        <Text style={styles.buttonText}>QR Code</Text>
       </Pressable>
       <Pressable
         onPress={() => {
-          handleClockingButtonPress("ClockOut");
+          handleClockingOptionChange("MANUAL");
         }}
         style={() => [
           styles.button,
-          clockingType === "ClockOut" ? styles.selectedButton : {},
+          optionSelected === "MANUAL" ? styles.selectedButton : {},
         ]}
       >
-        <Ionicons
-          style={{ marginRight: -10 }}
-          name='exit-outline'
-          size={50}
-          color='red'
-        />
+        <Ionicons name='hand-right-outline' size={50} color='blue' />
 
-        <Text style={styles.buttonText}>Clock out</Text>
+        <Text style={styles.buttonText}>Manual</Text>
       </Pressable>
     </View>
   );
@@ -53,9 +37,9 @@ export default function ClockingSelectionButtons() {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    marginTop: 100,
+    marginTop: 50,
     marginBottom: 30,
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -68,7 +52,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginVertical: 10,
     marginHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 80,
     shadowColor: "#121212",
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.2,
