@@ -1,7 +1,7 @@
 import { Camera } from "expo-camera";
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
-import { CameraView } from "expo-camera/next";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { CameraView } from "expo-camera";
 import { useClockingRequest } from "../../context/ClockingRequestContext";
 
 type BarCodeEvent = {
@@ -12,7 +12,7 @@ type BarCodeEvent = {
 export default function CodeScanningScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  const { clockingType, qrData, location, setQrData } = useClockingRequest();
+  const { handleQrCode } = useClockingRequest();
 
   useEffect(() => {
     const getCameraPermissions = async () => {
@@ -25,15 +25,7 @@ export default function CodeScanningScreen() {
 
   const handleBarCodeScanned = ({ data }: BarCodeEvent) => {
     setScanned(true);
-    setQrData(data);
-    alert(
-      "QR CODE SCANNED \n Location: " +
-        JSON.stringify(location) +
-        "\n Clocking type: " +
-        clockingType +
-        "\n QR code data: " +
-        data
-    );
+    handleQrCode(data);
   };
 
   if (hasPermission === null) {
@@ -53,7 +45,12 @@ export default function CodeScanningScreen() {
         style={StyleSheet.absoluteFillObject}
       />
       {scanned && (
-        <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />
+        <Pressable
+          style={styles.buttonScanAgain}
+          onPress={() => setScanned(false)}
+        >
+          <Text style={styles.textScanAgain}>Scan Again</Text>
+        </Pressable>
       )}
     </View>
   );
@@ -64,5 +61,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 30,
     backgroundColor: "rgba(243,242,248,255)",
+    alignItems: "center",
+  },
+  buttonScanAgain: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    backgroundColor: "rgba(1, 59, 109, 1)",
+    borderWidth: 0.5,
+    borderColor: "#fff",
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textScanAgain: {
+    fontSize: 18,
+    color: "#ffffff",
   },
 });

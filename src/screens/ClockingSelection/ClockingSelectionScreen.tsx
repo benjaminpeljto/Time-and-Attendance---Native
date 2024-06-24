@@ -1,50 +1,57 @@
-import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
-import { type ClockingStackParams } from "../../navigation/ClockingStackNavigator";
-import { type NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import ScanQRCodeButton from "../../components/ScanQRCodeButton";
 import ClockingSelectionButtons from "../../components/ClockingSelectionButtons";
 import { useClockingRequest } from "../../context/ClockingRequestContext";
-import { useEffect, useState } from "react";
-import * as Location from "expo-location";
-
-type ClockingSelectionScreenProps = NativeStackScreenProps<
-  ClockingStackParams,
-  "ClockingSelection"
->;
+import { useState } from "react";
+import {
+  type ClockingOption,
+  type ClockingSelectionScreenProps,
+} from "../../utils/types";
 
 export default function ClockingSelectionScreen({
   navigation,
 }: ClockingSelectionScreenProps) {
-  const { setClockingType, setLocation } = useClockingRequest();
+  const { isLocationLoading } = useClockingRequest();
+  const [clockingOption, setClockingOption] = useState<ClockingOption>(null);
 
-  const handleClockingDismiss = () => {
-    setClockingType(null);
+  const handleClockingOptionChange = (option: ClockingOption) => {
+    setClockingOption(option);
   };
 
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Highest,
-      });
-      setLocation(location);
-    })();
-  }, []);
-
   return (
-    <TouchableWithoutFeedback onPress={handleClockingDismiss}>
+    <TouchableWithoutFeedback onPress={() => handleClockingOptionChange(null)}>
       <View style={styles.container}>
-        <Text style={styles.instructionMessageText}>
-          Please select a clocking option:
-        </Text>
-        <ClockingSelectionButtons />
-        <ScanQRCodeButton navigation={navigation} />
+        {isLocationLoading ? (
+          // Show spinner while location is loading
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color='rgba(1, 59, 109, 1)' />
+            <Text style={styles.loadingText}>Retrieving your location...</Text>
+            <Text style={styles.loadingSubText}>
+              This might take a few moments. Please wait.
+            </Text>
+          </View>
+        ) : (
+          // Show the clocking options and QR code button once location is loaded
+          <>
+            <Text style={styles.instructionMessageText}>
+              Select a clocking option:
+            </Text>
+            <ClockingSelectionButtons
+              optionSelected={clockingOption}
+              handleClockingOptionChange={handleClockingOptionChange}
+            />
+            <ScanQRCodeButton
+              selectedOption={clockingOption}
+              navigation={navigation}
+            />
+          </>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -53,7 +60,7 @@ export default function ClockingSelectionScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
+    padding: 20,
     backgroundColor: "rgba(243,242,248,255)",
   },
   instructionMessageText: {
@@ -61,6 +68,23 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "500",
     alignSelf: "center",
+    textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 10,
+    textAlign: "center",
+  },
+  loadingSubText: {
+    fontSize: 16,
+    marginTop: 5,
+    color: "gray",
     textAlign: "center",
   },
 });
