@@ -1,6 +1,12 @@
+import { useContext, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import AuthContext from "../../context/AuthContext";
 
 export default function LeavesScreen() {
+  const { authState } = useContext(AuthContext);
+  useEffect(() => {
+    console.log(authState.jwt);
+  });
   return (
     <View style={styles.container}>
       <Text>Your leaves here</Text>
