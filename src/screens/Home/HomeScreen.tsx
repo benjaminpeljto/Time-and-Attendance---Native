@@ -1,42 +1,55 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
-  Text,
   View,
-  Image,
   SafeAreaView,
   ScrollView,
   Button,
   Dimensions,
   Alert,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import AuthContext from "../../context/AuthContext";
 import { ActivityCard, FloatingCard, LocationCard } from "../../components";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Entypo } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
-const DefaultImage = require("../../assets/images/default-profile-image.jpg");
+import HomeHeader from "../../components/HomeHeader";
+import { ClockingService } from "../../services";
+import ClockingRequestContext from "../../context/ClockingRequestContext";
+import { HomeScreenDataResponse } from "../../utils/types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const [welcomeMessage, setWelcomeMessage] = useState("");
-  const { authState, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
+  const { location, isLocationLoading } = useContext(ClockingRequestContext);
+  const [homeData, setHomeData] = useState<HomeScreenDataResponse>({
+    clockInTime: null,
+    clockOutTime: null,
+    clockedDurationSeconds: 0,
+    insideLocation: false,
+  });
+  const [refreshing, setRefreshing] = useState(false); // Add refreshing state
 
-  useEffect(() => {
-    let hours = new Date().getHours();
-    if (hours >= 0 && hours < 12) {
-      setWelcomeMessage("Good morning");
-    } else if (hours >= 12 && hours < 18) {
-      setWelcomeMessage("Good afternoon");
-    } else {
-      setWelcomeMessage("Good afternoon");
+  // Function to fetch home screen data
+  const fetchHomeScreenData = async () => {
+    if (location && !isLocationLoading) {
+      const data = await ClockingService.requestHomeScreenData({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      setHomeData(data);
     }
-  }, []);
+  };
 
-  const getFirstName = (fullName: string | null) => {
-    if (fullName) return fullName.split(" ")[0];
-    return "";
+  // Fetch data initially
+  useEffect(() => {
+    fetchHomeScreenData();
+  }, [location, isLocationLoading]);
+
+  // Function to handle refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchHomeScreenData(); // Fetch the latest data
+    setRefreshing(false); // End refreshing
   };
 
   const confirmLogoutAlert = () => {
@@ -59,58 +72,29 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerContainer}>
-        <View style={styles.header}>
-          <Image
-            source={
-              authState.profileImageUrl
-                ? { uri: authState.profileImageUrl }
-                : DefaultImage
-            }
-            style={styles.avatar}
-          />
-          <View style={styles.textContainer}>
-            <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
-            <Text style={styles.userName}>
-              {getFirstName(authState.fullName)}.
-            </Text>
-          </View>
-        </View>
-        <FloatingCard />
-      </View>
+      <HomeHeader>
+        <FloatingCard
+          clockedIn={homeData.clockInTime ? true : false}
+          clockedOut={homeData.clockOutTime ? true : false}
+          durationSeconds={homeData.clockedDurationSeconds}
+        />
+      </HomeHeader>
       <View style={styles.content}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           decelerationRate='normal'
           scrollEventThrottle={16}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         >
           <View style={styles.mainContent}>
-            <View style={styles.activityHeader}>
-              <View style={styles.headerLeft}>
-                <MaterialCommunityIcons
-                  name='calendar-text-outline'
-                  size={20}
-                  color='#4A4A4A'
-                />
-                <Text style={styles.activityTitle}>Today's activity</Text>
-              </View>
-              <Text style={styles.cardAction}>View All</Text>
-            </View>
-            <ActivityCard />
-
-            <View style={styles.activityHeader}>
-              <View style={styles.headerLeft}>
-                <Entypo name='location' size={20} color='#4A4A4A' />
-                <Text style={styles.activityTitle}>Your location</Text>
-              </View>
-              <View style={styles.headerRight}>
-                <FontAwesome name='refresh' size={14} color='#0268C0' />
-                <Text style={styles.cardAction}>Refresh</Text>
-              </View>
-            </View>
-
-            <LocationCard isAtLocation={false} />
+            <ActivityCard
+              clockInTime={homeData.clockInTime}
+              clockOutTime={homeData.clockOutTime}
+            />
+            <LocationCard isAtLocation={homeData.insideLocation} />
           </View>
           <View style={styles.logoutButtonContainer}>
             <Button title='Logout' onPress={confirmLogoutAlert} color='red' />
@@ -127,44 +111,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(1, 59, 109, 1)",
     paddingTop: 20,
   },
-  headerContainer: {
-    backgroundColor: "rgba(1, 59, 109, 1)",
-    paddingBottom: 120, // Space for the floating card overlap
-    position: "relative",
-    zIndex: 1,
-  },
-  header: {
-    paddingStart: 30,
-    paddingEnd: 30,
-    paddingTop: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 10,
-  },
-  textContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  welcomeMessage: {
-    color: "#efeff1",
-    fontSize: 25,
-    fontWeight: "normal",
-    textAlign: "right",
-  },
-  userName: {
-    color: "#fff",
-    fontSize: 25,
-    fontWeight: "bold",
-    textAlign: "right",
-  },
   scrollContent: {
-    paddingTop: 120,
     paddingHorizontal: 20,
+    paddingTop: 30,
     flexGrow: 1,
     backgroundColor: "rgba(243,242,248,255)",
   },
@@ -172,32 +121,6 @@ const styles = StyleSheet.create({
     minHeight: SCREEN_HEIGHT - 450,
     paddingBottom: 20,
     backgroundColor: "rgba(243,242,248,255)",
-  },
-  activityHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    marginBottom: 10,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  activityTitle: {
-    fontSize: 15,
-    fontWeight: "bold",
-    marginLeft: 5,
-    color: "#4A4A4A",
-  },
-  cardAction: {
-    fontSize: 14,
-    color: "#0268C0",
-    fontWeight: "bold",
-    marginLeft: 5,
   },
   logoutButtonContainer: {
     padding: 20,
@@ -208,6 +131,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingTop: 90,
     backgroundColor: "rgba(243,242,248,255)",
   },
 });

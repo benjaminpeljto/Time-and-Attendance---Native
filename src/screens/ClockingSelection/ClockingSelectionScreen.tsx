@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     alignSelf: "center",
     textAlign: "center",
+    color: "#2F3841",
   },
   loadingContainer: {
     flex: 1,

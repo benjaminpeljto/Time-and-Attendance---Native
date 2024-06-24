@@ -1,30 +1,44 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { HomeLocationCardProps } from "../utils/types";
+import { Entypo } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import { type HomeLocationCardProps } from "../utils/types";
 
 export default function HomeLocationCard({
   isAtLocation,
 }: HomeLocationCardProps) {
   return (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.iconWrapper}>
-          <MaterialIcons
-            name={isAtLocation ? "check" : "close"}
-            size={24}
-            color={isAtLocation ? "green" : "red"}
-          />
+    <>
+      <View style={styles.activityHeader}>
+        <View style={styles.headerSub}>
+          <Entypo name='location' size={20} color='#4A4A4A' />
+          <Text style={styles.activityTitle}>Your location</Text>
         </View>
-        <View style={styles.locationTextWrapper}>
-          <Text style={styles.locationText}>
-            {isAtLocation
-              ? "At International Burch University"
-              : "Outside\nInternational Burch University"}
-          </Text>
+        <View style={styles.headerSub}>
+          <FontAwesome name='refresh' size={14} color='#0268C0' />
+          <Text style={styles.cardAction}>Refresh</Text>
         </View>
       </View>
-    </View>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.iconWrapper}>
+            <MaterialIcons
+              name={isAtLocation ? "check" : "close"}
+              size={24}
+              color={isAtLocation ? "green" : "red"}
+            />
+          </View>
+          <View style={styles.locationTextWrapper}>
+            <Text style={styles.locationText}>
+              {isAtLocation
+                ? "At International Burch University"
+                : "Outside\nInternational Burch University"}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </>
   );
 }
 
@@ -57,5 +71,27 @@ const styles = StyleSheet.create({
   },
   locationTextWrapper: {
     flex: 1,
+  },
+  activityHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: 10,
+  },
+  headerSub: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  activityTitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+    marginLeft: 5,
+    color: "#4A4A4A",
+  },
+  cardAction: {
+    fontSize: 14,
+    color: "#0268C0",
+    fontWeight: "bold",
+    marginLeft: 5,
   },
 });

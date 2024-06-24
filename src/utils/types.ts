@@ -1,5 +1,6 @@
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 import { type LocationObject } from "expo-location";
+import { type ReactNode } from "react";
 
 export type ClockingStackParams = {
     ClockingSelection: undefined;
@@ -72,3 +73,32 @@ export type ClockingRequestContextType = {
 export type HomeLocationCardProps = {
   isAtLocation: boolean;
 }
+
+export type HomeScreenDataRequest = {
+  longitude: number;
+  latitude: number;
+}
+
+export type HomeScreenDataResponse = {
+  clockInTime: string | null;
+  clockOutTime: string | null;
+  clockedDurationSeconds: number;
+  insideLocation: boolean;
+}
+
+export type HomeHeaderProps = {
+  children?: ReactNode;
+};
+
+export type FloatingCardProps = {
+  clockedIn: boolean;
+  clockedOut: boolean;
+  durationSeconds: number;
+};
+
+export type HomeActivityCardProps = {
+  clockInTime: string | null;
+  clockOutTime: string | null;
+};
+
+export type LeavesFilteringOption = "All" | "Pending" | "Upcoming" | "History";
