@@ -76,7 +76,8 @@ export default function LeavesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 20,
+    paddingHorizontal: 20,
     backgroundColor: "rgba(243,242,248,255)",
   },
   containerScrollable: {

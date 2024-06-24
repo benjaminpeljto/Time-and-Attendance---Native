@@ -52,10 +52,6 @@ export default function LeaveListItem({
           <Text style={styles.labelText}>Applied Days</Text>
           <Text style={styles.detailText}>{appliedDays} Days</Text>
         </View>
-        <View style={styles.detailBox}>
-          <Text style={styles.labelText}>Approved By</Text>
-          <Text style={styles.detailText}>{approvedBy}</Text>
-        </View>
       </View>
     </View>
   );
@@ -105,7 +101,7 @@ const styles = StyleSheet.create({
   },
   detailsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
   },
   detailBox: {
     alignItems: "flex-start",
