@@ -2,11 +2,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ClockingSelectionScreen, QRCodeScanningScreen } from "../screens";
 import { Pressable, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-
-export type ClockingStackParams = {
-  ClockingSelection: undefined;
-  QRCodeScanning: undefined;
-};
+import ManualClockingScreen from "../screens/ManualClocking/ManualClockingScreen";
+import { type ClockingStackParams } from "../utils/types";
 
 const ClockingStack = createNativeStackNavigator<ClockingStackParams>();
 
@@ -33,6 +30,16 @@ const ClockingStackNav = () => {
         options={{
           headerBackTitle: "Selection",
           title: "Scan QR Code",
+          headerStyle: style.headerStyle,
+          headerTitleStyle: { color: "#fff" },
+        }}
+      />
+      <ClockingStack.Screen
+        name='ManualClocking'
+        component={ManualClockingScreen}
+        options={{
+          headerBackTitle: "Selection",
+          title: "Manual Clocking",
           headerStyle: style.headerStyle,
           headerTitleStyle: { color: "#fff" },
         }}
