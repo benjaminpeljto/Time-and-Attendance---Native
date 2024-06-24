@@ -1,4 +1,5 @@
 import {
+  Alert,
   Keyboard,
   StyleSheet,
   Text,
@@ -14,20 +15,38 @@ import {
 import useAccessLogin from "../../hooks/useAccessLogin";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParams } from "../../navigation/RootStackNavigator";
+import { AuthService } from "../../services";
+import { useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+import { AxiosError } from "axios";
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParams, "Login">;
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { accessCode, handleAccessCodeChange, handleAccessLogin } =
     useAccessLogin();
+  const { onLoginSuccess } = useContext(AuthContext);
 
   const handleDismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (handleAccessLogin()) {
-      navigation.navigate("BottomTabNav");
+      const formattedAccessCode = accessCode.replace(/-/g, "");
+      AuthService.loginNative({ token: formattedAccessCode })
+        .then((data) => {
+          onLoginSuccess(data.jwt, data.profileImageUrl, data.fullName);
+          handleDismissKeyboard();
+          handleAccessCodeChange("");
+          navigation.navigate("BottomTabNav");
+        })
+        .catch((error: AxiosError) => {
+          const message =
+            (error.response?.data as { message: string })?.message ||
+            "Request failed to send.";
+          Alert.alert("Error while logging in", message);
+        });
     }
   };
 
