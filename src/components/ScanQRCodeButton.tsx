@@ -1,36 +1,31 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { ClockingStackParams } from "../navigation/ClockingStackNavigator";
-import { useClockingRequest } from "../context/ClockingRequestContext";
 import { AntDesign } from "@expo/vector-icons";
+import { ScanQRCodeButtonProps } from "../utils/types";
 
-type ScanQRCodeButtonProps = {
-  navigation: NativeStackNavigationProp<
-    ClockingStackParams,
-    "ClockingSelection",
-    undefined
-  >;
-};
 export default function ScanQRCodeButton({
   navigation,
+  selectedOption,
 }: ScanQRCodeButtonProps) {
-  const { clockingType } = useClockingRequest();
-
-  return clockingType ? (
+  return selectedOption ? (
     <View style={styles.continueButtonContainer}>
       <Pressable
         style={() => [
           styles.continueButton,
-          clockingType === "ClockIn"
-            ? styles.clockInStyle
-            : styles.clockOutStyle,
+          selectedOption === "QR" ? styles.clockInStyle : styles.clockOutStyle,
         ]}
         onPress={() => {
-          navigation.navigate("QRCodeScanning");
+          if (selectedOption === "QR") navigation.navigate("QRCodeScanning");
+          else navigation.navigate("ManualClocking");
         }}
       >
-        <AntDesign name='qrcode' size={24} color='white' />
-        <Text style={styles.continueButtonText}>Scan QR Code</Text>
+        <AntDesign
+          name={selectedOption === "QR" ? "qrcode" : "form"}
+          size={24}
+          color='white'
+        />
+        <Text style={styles.continueButtonText}>
+          {selectedOption === "QR" ? "Scan QR Code" : "Enter Manually"}
+        </Text>
       </Pressable>
     </View>
   ) : null;
@@ -41,7 +36,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   continueButton: {
-    width: 200,
+    width: 210,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
@@ -55,12 +50,12 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "white",
     fontSize: 18,
-    marginStart: 4,
+    marginStart: 5,
   },
   clockInStyle: {
     backgroundColor: "rgb(67, 175, 17)",
   },
   clockOutStyle: {
-    backgroundColor: "rgb(244,76,44)",
+    backgroundColor: "rgb(44,76,244)",
   },
 });
