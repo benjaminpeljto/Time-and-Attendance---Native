@@ -8,6 +8,7 @@ export default function FloatingCard({
   clockedIn,
   clockedOut,
   durationSeconds,
+  errorMessage,
 }: FloatingCardProps) {
   const navigation = useNavigation<NavigationProp<any>>();
   const [formattedDate, setFormattedDate] = useState("");
@@ -15,6 +16,8 @@ export default function FloatingCard({
   const [minutes, setMinutes] = useState(0);
   const [iconName, setIconName] = useState<"login" | "logout">("login");
   const [infoMessage, setInfoMessage] = useState("");
+  const [buttonText, setButtonText] = useState("Loading...");
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   useEffect(() => {
     // Format current date
@@ -35,18 +38,26 @@ export default function FloatingCard({
     // Update the icon and message based on clocking state
     if (clockedOut) {
       setIconName("login");
-      setInfoMessage("You have clocked out!");
+      setInfoMessage("You have clocked out, clock in again tomorrow!");
+      setButtonText("Clock In");
     } else if (clockedIn) {
       setIconName("logout");
       setInfoMessage("You are clocked in!");
+      setButtonText("Clock Out");
     } else {
       setIconName("login");
       setInfoMessage("You haven’t clocked in today!");
+      setButtonText("Clock In");
     }
+
+    // Determine if the button should be disabled
+    setIsButtonDisabled(clockedIn && clockedOut);
   }, [clockedIn, clockedOut, durationSeconds]);
 
   const handleClockingNavigation = () => {
-    navigation.navigate("Clocking");
+    if (!isButtonDisabled) {
+      navigation.navigate("Clocking");
+    }
   };
 
   return (
@@ -74,16 +85,23 @@ export default function FloatingCard({
         </View>
         <Text style={styles.hoursText}>HRS</Text>
       </View>
-      <Text style={styles.infoText}>{infoMessage}</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleClockingNavigation}
-      >
-        <AntDesign name={iconName} size={18} color='white' />
-        <Text style={styles.buttonText}>
-          {clockedOut ? "Clock In" : "Clock Out"}
-        </Text>
-      </TouchableOpacity>
+      {errorMessage ? (
+        <View style={styles.errorWrapper}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      ) : (
+        <>
+          <Text style={styles.infoText}>{infoMessage}</Text>
+          <TouchableOpacity
+            style={[styles.button, isButtonDisabled && styles.buttonDisabled]}
+            onPress={handleClockingNavigation}
+            disabled={isButtonDisabled}
+          >
+            <AntDesign name={iconName} size={18} color='white' />
+            <Text style={styles.buttonText}>{buttonText}</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 }
@@ -161,9 +179,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 5,
   },
+  buttonDisabled: {
+    backgroundColor: "#A9A9A9", // Light grey color for disabled state
+  },
   buttonText: {
     color: "white",
     marginLeft: 10,
     fontSize: 16,
+  },
+  errorWrapper: {
+    marginTop: 10,
+    backgroundColor: "#FFDDDD",
+    padding: 10,
+    borderRadius: 5,
+  },
+  errorText: {
+    color: "#D8000C",
+    fontSize: 14,
+    textAlign: "center",
   },
 });
