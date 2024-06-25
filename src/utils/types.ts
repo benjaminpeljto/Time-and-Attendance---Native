@@ -60,13 +60,24 @@ export type QRCodeAttendanceResponse = {
   clockingType: string;
 }
 
+export type ManualAttendanceRequest = {
+  timeIn: string;
+  timeOut: string;
+}
+
+export type ManualAttendanceResponse = {
+  message: string;
+  timeIn: string;
+  timeOut: string;
+}
+
 export type ClockingRequestContextType = {
   clockingType: ClockingType | null;
   qrData: string;
   location: LocationObject | null;
   controllerId: number | null;
   handleQrCode: (code: string) => void;
-  setLocation: (location: LocationObject) => void;
+  fetchLocation: () => void;
   isLocationLoading: boolean; // New loading state
 };
 
@@ -86,6 +97,10 @@ export type HomeScreenDataResponse = {
   insideLocation: boolean;
 }
 
+export type LocationCheckResponse = {
+  insideLocation: boolean;
+}
+
 export type HomeHeaderProps = {
   children?: ReactNode;
 };
@@ -94,11 +109,13 @@ export type FloatingCardProps = {
   clockedIn: boolean;
   clockedOut: boolean;
   durationSeconds: number;
+  errorMessage: string | null;
 };
 
 export type HomeActivityCardProps = {
   clockInTime: string | null;
   clockOutTime: string | null;
+  isLoading: boolean;
 };
 
 export type LeavesFilteringOption = "All" | "Pending" | "Upcoming" | "History";
