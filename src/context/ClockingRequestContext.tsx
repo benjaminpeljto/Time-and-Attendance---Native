@@ -27,7 +27,7 @@ const initialState: ClockingRequestContextType = {
   qrData: "",
   location: null,
   controllerId: null,
-  setLocation: () => {},
+  fetchLocation: () => {},
   handleQrCode: () => {},
   isLocationLoading: true,
 };
@@ -39,28 +39,28 @@ export const ClockingRequestProvider = ({ children }: PropsWithChildren) => {
   const [qrData, setQrData] = useState<string>("");
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [controllerId, setControllerId] = useState<number | null>(null);
-  const [isLocationLoading, setIsLocationLoading] = useState(true);
+  const [isLocationLoading, setIsLocationLoading] = useState(false);
   const navigation = useNavigation<NavigationProp<any>>();
 
   useEffect(() => {
-    // Fetch location as soon as the component mounts
-    const fetchLocation = async () => {
-      const { status } = await requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        const currentPosition = await getCurrentPositionAsync({});
-        setLocation(currentPosition);
-        setIsLocationLoading(false); // Set loading to false once location is fetched
-      } else {
-        Alert.alert(
-          "Location Permission",
-          "Permission to access location was denied."
-        );
-        setIsLocationLoading(false); // Set loading to false even if permission is denied
-      }
-    };
-
     fetchLocation();
   }, []);
+
+  const fetchLocation = async () => {
+    setIsLocationLoading(true);
+    const { status } = await requestForegroundPermissionsAsync();
+    if (status === "granted") {
+      const currentPosition = await getCurrentPositionAsync({});
+      setLocation(currentPosition);
+      setIsLocationLoading(false);
+    } else {
+      Alert.alert(
+        "Location Permission",
+        "Permission to access location was denied. In order to use the app please allow the location access in device settings."
+      );
+      setIsLocationLoading(false);
+    }
+  };
 
   const handleQrCode = (code: string) => {
     try {
@@ -161,7 +161,7 @@ export const ClockingRequestProvider = ({ children }: PropsWithChildren) => {
         qrData,
         location,
         controllerId,
-        setLocation,
+        fetchLocation,
         handleQrCode,
         isLocationLoading,
       }}
