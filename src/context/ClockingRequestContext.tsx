@@ -18,7 +18,7 @@ import {
   type QRCodeData,
 } from "../utils/types";
 import { Alert } from "react-native";
-import { AttendanceService } from "../services";
+import { ClockingService } from "../services";
 import Toast from "react-native-toast-message";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 
@@ -133,7 +133,7 @@ export const ClockingRequestProvider = ({ children }: PropsWithChildren) => {
       location?.coords.latitude !== undefined
     ) {
       try {
-        const response = await AttendanceService.requestQrAttendance({
+        const response = await ClockingService.requestQrAttendance({
           code: code,
           clockingType: type,
           controllerId: controllerId,
@@ -147,7 +147,10 @@ export const ClockingRequestProvider = ({ children }: PropsWithChildren) => {
         showToastErrorClocking(error.response.data.message);
       }
     } else {
-      console.log("Insufficient data to make an attendance request.");
+      Alert.alert(
+        "Error while sending request",
+        "Insufficient data, please reload the app."
+      );
     }
   };
 
