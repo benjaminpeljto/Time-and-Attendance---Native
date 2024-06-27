@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import {
   LeaveListItem,
@@ -67,7 +61,7 @@ export default function LeavesScreen() {
         style={styles.floatingButton}
         onPress={handleButtonPress}
       >
-        <AntDesign name='plus' size={30} color='rgba(1, 59, 109, 1)' />
+        <AntDesign name='plus' size={30} color='#fff' />
       </TouchableOpacity>
     </View>
   );
@@ -119,7 +113,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(1, 59, 109, 1)",
     justifyContent: "center",
     alignItems: "center",
     bottom: 30,

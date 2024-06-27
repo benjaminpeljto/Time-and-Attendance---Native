@@ -7,7 +7,8 @@ import {
   Button,
   Dimensions,
   Alert,
-  RefreshControl, // Import RefreshControl
+  RefreshControl,
+  Text,
 } from "react-native";
 import AuthContext from "../../context/AuthContext";
 import { ActivityCard, FloatingCard, LocationCard } from "../../components";
@@ -20,36 +21,76 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const { logout } = useContext(AuthContext);
-  const { location, isLocationLoading } = useContext(ClockingRequestContext);
+  const { location, isLocationLoading, fetchLocation } = useContext(
+    ClockingRequestContext
+  );
   const [homeData, setHomeData] = useState<HomeScreenDataResponse>({
     clockInTime: null,
     clockOutTime: null,
     clockedDurationSeconds: 0,
     insideLocation: false,
   });
-  const [refreshing, setRefreshing] = useState(false); // Add refreshing state
+  const [refreshing, setRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isActivityLoading, setIsActivityLoading] = useState<boolean>(false);
+  const [shouldFetchHomeData, setShouldFetchHomeData] = useState<boolean>(true);
 
   // Function to fetch home screen data
   const fetchHomeScreenData = async () => {
-    if (location && !isLocationLoading) {
-      const data = await ClockingService.requestHomeScreenData({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      setHomeData(data);
+    setIsActivityLoading(true);
+    try {
+      if (location && !isLocationLoading) {
+        const data = await ClockingService.requestHomeScreenData({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        setHomeData(data);
+        setErrorMessage(null); // Clear any previous error message
+      }
+    } catch (error) {
+      setErrorMessage(
+        "Failed to fetch home screen data. \n Swipe up to refresh."
+      );
+      console.log(error);
+    } finally {
+      setIsActivityLoading(false);
     }
   };
 
-  // Fetch data initially
+  // Fetch data initially if location is available, otherwise wait for location
   useEffect(() => {
-    fetchHomeScreenData();
-  }, [location, isLocationLoading]);
+    const fetchInitialData = async () => {
+      setIsActivityLoading(true);
+      if (!location) {
+        await fetchLocation();
+      }
+      setShouldFetchHomeData(true);
+    };
+    fetchInitialData();
+  }, []);
+
+  // Fetch home screen data when location is available and should fetch flag is true
+  useEffect(() => {
+    if (location && !isLocationLoading && shouldFetchHomeData) {
+      fetchHomeScreenData();
+      setShouldFetchHomeData(false); // Reset the flag after fetching data
+    }
+  }, [location, isLocationLoading, shouldFetchHomeData]);
 
   // Function to handle refresh
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchHomeScreenData(); // Fetch the latest data
-    setRefreshing(false); // End refreshing
+    setIsActivityLoading(true);
+    await fetchLocation();
+    await fetchHomeScreenData();
+    setRefreshing(false);
+  };
+
+  const getContentStyle = () => {
+    return {
+      ...styles.content,
+      paddingTop: refreshing ? 110 : 90,
+    };
   };
 
   const confirmLogoutAlert = () => {
@@ -77,9 +118,10 @@ export default function HomeScreen() {
           clockedIn={homeData.clockInTime ? true : false}
           clockedOut={homeData.clockOutTime ? true : false}
           durationSeconds={homeData.clockedDurationSeconds}
+          errorMessage={errorMessage}
         />
       </HomeHeader>
-      <View style={styles.content}>
+      <View style={getContentStyle()}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -89,16 +131,25 @@ export default function HomeScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          <View style={styles.mainContent}>
-            <ActivityCard
-              clockInTime={homeData.clockInTime}
-              clockOutTime={homeData.clockOutTime}
-            />
-            <LocationCard isAtLocation={homeData.insideLocation} />
-          </View>
-          <View style={styles.logoutButtonContainer}>
-            <Button title='Logout' onPress={confirmLogoutAlert} color='red' />
-          </View>
+          {errorMessage ? null : (
+            <>
+              <View style={styles.mainContent}>
+                <ActivityCard
+                  clockInTime={homeData.clockInTime}
+                  clockOutTime={homeData.clockOutTime}
+                  isLoading={isActivityLoading}
+                />
+                <LocationCard isAtLocation={homeData.insideLocation} />
+              </View>
+              <View style={styles.logoutButtonContainer}>
+                <Button
+                  title='Logout'
+                  onPress={confirmLogoutAlert}
+                  color='red'
+                />
+              </View>
+            </>
+          )}
         </ScrollView>
       </View>
     </SafeAreaView>
