@@ -2,23 +2,23 @@ import { StyleSheet, TextInput, View } from "react-native";
 
 type AccessCodeInputProps = {
   accessCode: string;
-  setAccessCode: (code: string) => void;
+  handleAccessCodeChange: (code: string) => void;
 };
 
 export default function AccessCodeInput({
   accessCode,
-  setAccessCode,
+  handleAccessCodeChange,
 }: AccessCodeInputProps) {
   return (
     <View style={styles.inputWrapper}>
       <TextInput
         value={accessCode}
-        onChangeText={setAccessCode}
+        onChangeText={handleAccessCodeChange}
         placeholder='Your Access Code'
         placeholderTextColor={"rgba(255, 255, 255, 0.5)"}
         style={styles.input}
         keyboardType='number-pad'
-        maxLength={12}
+        maxLength={14}
       />
     </View>
   );

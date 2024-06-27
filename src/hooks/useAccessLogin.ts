@@ -5,11 +5,26 @@ const useAccessLogin = () => {
     const [accessCode, setAccessCode] = useState<string>("");
 
     const handleAccessLogin = () => {
-        if(!/^\d{12}$/.test(accessCode)){
+        
+        const cleanedCode = accessCode.replace(/-/g, "");
+
+        if(!/^\d{12}$/.test(cleanedCode)){
             Alert.alert("Error", "Wrong format", [{text: "Dismiss"}])
+            return false;
+        }
+        return true;
+    }
+
+    const handleAccessCodeChange = (code: string) => {
+        if(accessCode.length > code.length){
+            setAccessCode(code)
         }
         else{
-            Alert.alert("Access code:", accessCode, [{text: "Okeeej"}])
+            if(code.length === 4 || code.length === 9){
+                setAccessCode(code + "-");
+                return;
+            }
+            setAccessCode(code);
         }
     }
 
@@ -17,7 +32,8 @@ const useAccessLogin = () => {
     return {
         accessCode,
         setAccessCode,
-        handleAccessLogin
+        handleAccessLogin,
+        handleAccessCodeChange
     };
 }
 
