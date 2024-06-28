@@ -1,7 +1,7 @@
 import axios from "axios";
-import { BASE_SUB, BASE_URL_HOME, PORT } from "../constants";
+import { BASE_SUB, BASE_URL_HOME } from "../constants";
 
 export const appAxios = axios.create({
-    baseURL: BASE_URL_HOME + PORT + BASE_SUB,
+    baseURL: BASE_URL_HOME + BASE_SUB,
     timeout: 10000,
 })

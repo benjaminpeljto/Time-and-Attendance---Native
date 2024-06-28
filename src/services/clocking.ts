@@ -1,3 +1,4 @@
+import { BASE_SUB, BASE_URL_HOME } from "../constants";
 import { LocationCheckResponse, ManualAttendanceRequest, ManualAttendanceResponse, type HomeScreenDataRequest, type HomeScreenDataResponse, type QRCodeAttendanceRequest, type QRCodeAttendanceResponse } from "../utils/types";
 import { appAxios } from "./appAxios";
 import * as SecureStore from 'expo-secure-store';
